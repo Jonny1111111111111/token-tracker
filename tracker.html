@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Token Tracker — 10 launches</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 18px;
+    background: #0b0d10; color: #e8e8ea;
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.3px; }
+  .sub { color: #8b8f98; font-size: 13px; margin-bottom: 20px; }
+  .sub b { color: #cfd2d8; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; background: #121519; border: 1px solid #20242b; border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #1c2026; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; color: #8b8f98; background: #14181d; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #161a1f; }
+  .tkr { font-weight: 700; color: #ff8a3d; }
+  .ca { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; color: #aeb3bb; }
+  .ca button { margin-left: 8px; background: #20242b; color: #aeb3bb; border: 1px solid #2b3038; border-radius: 6px; padding: 2px 8px; font-size: 11px; cursor: pointer; }
+  .ca button:hover { color: #fff; border-color: #3a4049; }
+  a.chart { color: #57b6ff; text-decoration: none; }
+  a.chart:hover { text-decoration: underline; }
+  .vol { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .vol.none { color: #6b7280; font-weight: 400; }
+  td.vol { text-align: right; }
+  th.right { text-align: right; }
+  .dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#3ddc84; margin-right:7px; vertical-align: middle; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .foot { margin-top: 14px; color: #6b7280; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Token Tracker</h1>
+  <div class="sub"><span class="dot"></span><b id="count">10</b> tokens on Base · live volume from DEXScreener · <span id="status">loading…</span></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Ticker</th>
+        <th>Contract Address</th>
+        <th>DEXScreener</th>
+        <th class="right">Volume (24h)</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <div class="foot">Auto-refreshes every 30s. Freshly launched tokens may show “—” until DEXScreener indexes the pool.</div>
+</div>
+
+<script>
+  // Tokens launched in this batch (ticker + contract address).
+  const TOKENS = [
+    { ticker: "BLAZE",  ca: "0x72BE2f997B10D8DeA317bA5b715d5DAdbC9f8BA3" },
+    { ticker: "NEBULA", ca: "0x5B7C94D577a76A4AD79a9278a80F238d59D00Ba3" },
+    { ticker: "VORTEX", ca: "0x4C5d585Aa493241fD3Eb4cCB6490fA5f00Bf4bA3" },
+    { ticker: "QUASAR", ca: "0x3CF3e8A32e4f17Bb58f8f7B3A8655C785102Dba3" },
+    { ticker: "EMBER",  ca: "0xD45B51e5898C7032AB2b92e58F664cdEeC947BA3" },
+    { ticker: "PRISM",  ca: "0x428450200bAcdfF15aA8B0b259B049Fb21D70ba3" },
+    { ticker: "COMET",  ca: "0xD5B81D4c7a158C243a0e09286fBEa08392686Ba3" },
+    { ticker: "ZENITH", ca: "0xFd28cB81560bac3d62eA420760b1DC7637F18bA3" },
+    { ticker: "FLUX",   ca: "0x5AC3e320C3a5A188b9e40A887d6D68713Ae63ba3" },
+    { ticker: "APEX",   ca: "0xb1C9d93ad4f604ba8AFdcd6F8B441Dd9737BBbA3" },
+  ];
+
+  const REFRESH_MS = 30000;
+  const short = (a) => a.slice(0, 8) + "…" + a.slice(-6);
+  const fmtUsd = (n) => {
+    if (n == null || isNaN(n)) return "—";
+    if (n >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
+    if (n >= 1e6) return "$" + (n / 1e6).toFixed(2) + "M";
+    if (n >= 1e3) return "$" + (n / 1e3).toFixed(1) + "K";
+    return "$" + n.toFixed(2);
+  };
+
+  // Build the table rows once; volume cells are updated in place on each refresh.
+  const rowsEl = document.getElementById("rows");
+  for (const t of TOKENS) {
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td class="tkr">$' + t.ticker + '</td>' +
+      '<td class="ca"><span title="' + t.ca + '">' + short(t.ca) + '</span>' +
+        '<button data-ca="' + t.ca + '">copy</button></td>' +
+      '<td><a class="chart" href="https://dexscreener.com/base/' + t.ca + '" target="_blank" rel="noreferrer">chart ↗</a></td>' +
+      '<td class="vol none" id="vol-' + t.ca.toLowerCase() + '">—</td>';
+    rowsEl.appendChild(tr);
+  }
+  rowsEl.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-ca]");
+    if (!b) return;
+    navigator.clipboard?.writeText(b.dataset.ca);
+    b.textContent = "copied";
+    setTimeout(() => (b.textContent = "copy"), 1200);
+  });
+
+  async function refresh() {
+    const status = document.getElementById("status");
+    try {
+      const addrs = TOKENS.map((t) => t.ca).join(",");
+      const res = await fetch("https://api.dexscreener.com/latest/dex/tokens/" + addrs);
+      const data = await res.json();
+      // Sum 24h volume across all pairs for each token.
+      const volByToken = {};
+      for (const p of data.pairs || []) {
+        const a = (p.baseToken && p.baseToken.address || "").toLowerCase();
+        if (!a) continue;
+        volByToken[a] = (volByToken[a] || 0) + (p.volume && p.volume.h24 || 0);
+      }
+      for (const t of TOKENS) {
+        const cell = document.getElementById("vol-" + t.ca.toLowerCase());
+        const v = volByToken[t.ca.toLowerCase()];
+        if (v == null) { cell.textContent = "—"; cell.className = "vol none"; }
+        else { cell.textContent = fmtUsd(v); cell.className = "vol"; }
+      }
+      status.textContent = "updated " + new Date().toLocaleTimeString();
+    } catch (err) {
+      status.textContent = "fetch failed — retrying… (" + (err.message || err) + ")";
+    }
+  }
+
+  refresh();
+  setInterval(refresh, REFRESH_MS);
+</script>
+</body>
+</html>
