@@ -134,15 +134,24 @@
   async function refresh() {
     const status = document.getElementById("status");
     try {
-      const addrs = TOKENS.map((t) => t.ca).join(",");
-      const res = await fetch("https://api.dexscreener.com/latest/dex/tokens/" + addrs);
-      const data = await res.json();
+      // DEXScreener caps the tokens endpoint at 30 addresses per request, so
+      // split into chunks of 30 and merge the results (otherwise a >30-token
+      // list returns HTTP 400 and every cell would show "—").
+      const addrs = TOKENS.map((t) => t.ca);
+      const chunks = [];
+      for (let i = 0; i < addrs.length; i += 30) chunks.push(addrs.slice(i, i + 30));
+      const datasets = await Promise.all(chunks.map(async (c) => {
+        const res = await fetch("https://api.dexscreener.com/latest/dex/tokens/" + c.join(","));
+        return res.ok ? res.json() : { pairs: [] };
+      }));
       // Sum 24h volume across all pairs for each token.
       const volByToken = {};
-      for (const p of data.pairs || []) {
-        const a = (p.baseToken && p.baseToken.address || "").toLowerCase();
-        if (!a) continue;
-        volByToken[a] = (volByToken[a] || 0) + (p.volume && p.volume.h24 || 0);
+      for (const data of datasets) {
+        for (const p of data.pairs || []) {
+          const a = (p.baseToken && p.baseToken.address || "").toLowerCase();
+          if (!a) continue;
+          volByToken[a] = (volByToken[a] || 0) + (p.volume && p.volume.h24 || 0);
+        }
       }
       for (const t of TOKENS) {
         const cell = document.getElementById("vol-" + t.ca.toLowerCase());
