@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Token Tracker — 25 launches</title>
+<title>Token Tracker — 30 launches</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -39,7 +39,7 @@
 <body>
 <div class="wrap">
   <h1>Token Tracker</h1>
-  <div class="sub"><span class="dot"></span><b id="count">25</b> tokens on Base · live volume from DEXScreener · <span id="status">loading…</span></div>
+  <div class="sub"><span class="dot"></span><b id="count">30</b> tokens on Base · live volume from DEXScreener · <span id="status">loading…</span></div>
 
   <table>
     <thead>
@@ -59,31 +59,36 @@
 <script>
   // Tokens launched in this batch (ticker + contract address).
   const TOKENS = [
-    { ticker: "BLAZE",  ca: "0x72BE2f997B10D8DeA317bA5b715d5DAdbC9f8BA3" },
+    { ticker: "BLAZE", ca: "0x72BE2f997B10D8DeA317bA5b715d5DAdbC9f8BA3" },
     { ticker: "NEBULA", ca: "0x5B7C94D577a76A4AD79a9278a80F238d59D00Ba3" },
     { ticker: "VORTEX", ca: "0x4C5d585Aa493241fD3Eb4cCB6490fA5f00Bf4bA3" },
     { ticker: "QUASAR", ca: "0x3CF3e8A32e4f17Bb58f8f7B3A8655C785102Dba3" },
-    { ticker: "EMBER",  ca: "0xD45B51e5898C7032AB2b92e58F664cdEeC947BA3" },
-    { ticker: "PRISM",  ca: "0x428450200bAcdfF15aA8B0b259B049Fb21D70ba3" },
-    { ticker: "COMET",  ca: "0xD5B81D4c7a158C243a0e09286fBEa08392686Ba3" },
+    { ticker: "EMBER", ca: "0xD45B51e5898C7032AB2b92e58F664cdEeC947BA3" },
+    { ticker: "PRISM", ca: "0x428450200bAcdfF15aA8B0b259B049Fb21D70ba3" },
+    { ticker: "COMET", ca: "0xD5B81D4c7a158C243a0e09286fBEa08392686Ba3" },
     { ticker: "ZENITH", ca: "0xFd28cB81560bac3d62eA420760b1DC7637F18bA3" },
-    { ticker: "FLUX",   ca: "0x5AC3e320C3a5A188b9e40A887d6D68713Ae63ba3" },
-    { ticker: "APEX",   ca: "0xb1C9d93ad4f604ba8AFdcd6F8B441Dd9737BBbA3" },
-    { ticker: "AXON",   ca: "0xD7329B12d7F71F022faD4fE874b0A43B84236Ba3" },
-    { ticker: "SYNAPZ", ca: "0xceE018502ca2E4558b97A1dee14f129Cd8758ba3" },
-    { ticker: "VOIDX",  ca: "0x031CC49A649B15ab7931dA8f7Ac24ef07afbCBa3" },
-    { ticker: "BASRD",  ca: "0x2bd2d340ABE6617313e7bF686019ab5e4bC0aba3" },
-    { ticker: "SKIBZ",  ca: "0x5a8292a1Ea7F9622A9c71DB7c498Cd30B4482BA3" },
+    { ticker: "FLUX", ca: "0x5AC3e320C3a5A188b9e40A887d6D68713Ae63ba3" },
+    { ticker: "APEX", ca: "0xb1C9d93ad4f604ba8AFdcd6F8B441Dd9737BBbA3" },
+    { ticker: "PHOENIX", ca: "0xC34A0D85BeEB2210bD54fa9a277d1B25D915EBa3" },
+    { ticker: "THUNDER", ca: "0xD45Ab3dCeAb1fD8b4DD25f3442154F692E9BdbA3" },
+    { ticker: "ROCKET", ca: "0x1e2d2D6DA1aD337597493AC5B0Bb7CC12e71cbA3" },
+    { ticker: "GALAXY", ca: "0x4f0A3a74bb487E2B2f5A1C3CdeC448E387706ba3" },
+    { ticker: "INFERNO", ca: "0x8b0773f783fB6Bef5EC93c334b41a4aFbab1AbA3" },
     { ticker: "TSUNAMI", ca: "0xc43455a63Ca9304CD38211d1b09CFC45FF679BA3" },
     { ticker: "VOLCANO", ca: "0x4a456EE80045Aa262581F6d99a1C882b84E40ba3" },
-    { ticker: "METEOR",  ca: "0x8B10482dF27801F3496314B7Aba2d88E3EeEBbA3" },
-    { ticker: "DRAGON",  ca: "0xE7EFa1162d18Ed3ac5c327187f2F17C3348A9ba3" },
-    { ticker: "TITAN",   ca: "0xD89AA08DcF3530264aa6b14f4023b812D1804ba3" },
-    { ticker: "CYCLONE",   ca: "0x93035a9d47ca1f08c4d8d73322eE525314fD8ba3" },
+    { ticker: "METEOR", ca: "0x8B10482dF27801F3496314B7Aba2d88E3EeEBbA3" },
+    { ticker: "DRAGON", ca: "0xE7EFa1162d18Ed3ac5c327187f2F17C3348A9ba3" },
+    { ticker: "TITAN", ca: "0xD89AA08DcF3530264aa6b14f4023b812D1804ba3" },
+    { ticker: "CYCLONE", ca: "0x93035a9d47ca1f08c4d8d73322eE525314fD8ba3" },
     { ticker: "AVALANCHE", ca: "0x5181a5F7975248a9335015e47679d1E3274C1bA3" },
-    { ticker: "ECLIPSE",   ca: "0x2bB0589F4De3979d201BD05F06eb73fEb7913BA3" },
-    { ticker: "PULSAR",    ca: "0xfd3624242226CcB1427d6cb24e6f5477CA7c6BA3" },
-    { ticker: "FUSION",    ca: "0x860A34379737c0e37E12B1C1933b0E91ef6b9BA3" },
+    { ticker: "ECLIPSE", ca: "0x2bB0589F4De3979d201BD05F06eb73fEb7913BA3" },
+    { ticker: "PULSAR", ca: "0xfd3624242226CcB1427d6cb24e6f5477CA7c6BA3" },
+    { ticker: "FUSION", ca: "0x860A34379737c0e37E12B1C1933b0E91ef6b9BA3" },
+    { ticker: "AXON", ca: "0xD7329B12d7F71F022faD4fE874b0A43B84236Ba3" },
+    { ticker: "SYNAPZ", ca: "0xceE018502ca2E4558b97A1dee14f129Cd8758ba3" },
+    { ticker: "VOIDX", ca: "0x031CC49A649B15ab7931dA8f7Ac24ef07afbCBa3" },
+    { ticker: "BASRD", ca: "0x2bd2d340ABE6617313e7bF686019ab5e4bC0aba3" },
+    { ticker: "SKIBZ", ca: "0x5a8292a1Ea7F9622A9c71DB7c498Cd30B4482BA3" },
   ];
 
   const REFRESH_MS = 30000;
